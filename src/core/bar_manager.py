@@ -12,11 +12,14 @@ from core.event_service import EventService
 from core.config import get_stylesheet, get_config
 from copy import deepcopy
 
+from core.utils.win32.media import WindowsMedia
+
 
 class BarManager(QObject):
     styles_modified = pyqtSignal()
     config_modified = pyqtSignal()
-
+    tray_reload = pyqtSignal()
+    
     def __init__(self, config: dict, stylesheet: str):
         super().__init__()
         self.config = config
@@ -54,10 +57,11 @@ class BarManager(QObject):
             return
         if config and (config != self.config):
 
-            if config['bars'] != self.config['bars'] or config['widgets'] != self.config['widgets']:
+            if config['bars'] != self.config['bars'] or config['widgets'] != self.config['widgets'] or config['komorebi'] != self.config['komorebi']:
                 self.config = config
                 self.close_bars()
                 self.initialize_bars()
+                self.tray_reload.emit()
             else:
                 self.config = config
 
@@ -91,6 +95,9 @@ class BarManager(QObject):
         tasks = asyncio.all_tasks()
         for t in tasks:
             t.cancel()
+
+        if WindowsMedia.has_instance():
+            WindowsMedia().stop()
 
         for bar in self.bars:
             bar.close()

@@ -1,43 +1,43 @@
+DEFAULTS = {
+    'label': '\uf017 {%H:%M:%S}',
+    'label_alt': '\uf017 {%d-%m-%y %H:%M:%S}',
+    'callbacks': {
+        'on_left': 'toggle_label',
+        'on_middle': 'do_nothing',
+        'on_right': 'do_nothing'
+    }
+}
+
 VALIDATION_SCHEMA = {
-    'label_main': {
+    'label': {
         'type': 'string',
-        'default': '{title}'
+        'default': DEFAULTS['label']
     },
-    'label_sub': {
+    'label_alt': {
         'type': 'string',
-        'default': '{artist}'
+        'default': DEFAULTS['label_alt']
     },
     'hide_empty': {
         'type': 'boolean',
         'default': False
-    },
-    'update_interval': {
-        'type': 'integer',
-        'default': 1000,
-        'min': 0,
-        'max': 60000
     },
     'callbacks': {
         'type': 'dict',
         'schema': {
             'on_left': {
                 'type': 'string',
-                'default': 'do_nothing',
+                'default': DEFAULTS['callbacks']['on_left'],
             },
             'on_middle': {
                 'type': 'string',
-                'default': 'do_nothing',
+                'default': DEFAULTS['callbacks']['on_middle'],
             },
             'on_right': {
                 'type': 'string',
-                'default': 'do_nothing',
+                'default': DEFAULTS['callbacks']['on_right'],
             }
         },
-        'default': {
-            'on_left': 'do_nothing',
-            'on_middle': 'do_nothing',
-            'on_right': 'do_nothing'
-        }
+        'default': DEFAULTS['callbacks']
     },
     'max_field_size': {
         'type': 'dict',
@@ -68,17 +68,12 @@ VALIDATION_SCHEMA = {
         'type': 'boolean',
         'default': True
     },
-    'thumbnail_alpha_range': {
-        'type': 'float',
-        'default': 1.0,
-        'min': 0.0,
-        'max': 1.0
+    'thumbnail_alpha': {
+        'type': 'integer',
+        'default': 50,
+        'min': 0,
+        'max': 255
     },
-    'thumbnail_alpha_multiplier': {
-        'type': 'float',
-        'default': 0.6,
-        'min': 0.0,
-        'max': 1.0},
     'thumbnail_padding': {
         'type': 'integer',
         'default': 8,
