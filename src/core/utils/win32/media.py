@@ -73,15 +73,6 @@ class WindowsMedia(metaclass=Singleton):
         with self._subscription_channels_lock:
             self._subscription_channels = {k: [] for k in self._subscription_channels.keys()}
 
-        with self._current_session_lock:
-            session = self._current_session
-
-        # Remove all our subscriptions
-        if session is not None:
-            session.remove_media_properties_changed(self._registration_tokens['media_info'])
-            session.remove_timeline_properties_changed(self._registration_tokens['timeline_info'])
-            session.remove_playback_info_changed(self._registration_tokens['playback_info'])
-
     def _register_session_callbacks(self):
         with self._current_session_lock:
             self._registration_tokens['playback_info'] = self._current_session.add_playback_info_changed(self._on_playback_info_changed)
@@ -105,8 +96,9 @@ class WindowsMedia(metaclass=Singleton):
         with self._current_session_lock:
             self._current_session = manager.get_current_session()
 
-            if self._current_session is not None:
+            running_session = self._current_session is not None
 
+            if running_session:
                 # If the current session is not None, register callbacks
                 self._register_session_callbacks()
 
@@ -115,12 +107,12 @@ class WindowsMedia(metaclass=Singleton):
                     self._on_timeline_properties_changed(self._current_session, None)
                     self._on_media_properties_changed(self._current_session, None)
 
-            # Get subscribers
-            with self._subscription_channels_lock:
-                callbacks = self._subscription_channels['session_status']
+        # Get subscribers
+        with self._subscription_channels_lock:
+            callbacks = self._subscription_channels['session_status']
 
-            for callback in callbacks:
-                callback(self._current_session is not None)
+        for callback in callbacks:
+            callback(running_session)
 
     def _on_playback_info_changed(self, session: Session, args: PlaybackInfoChangedEventArgs):
         if DEBUG:
