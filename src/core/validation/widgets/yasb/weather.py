@@ -14,6 +14,8 @@ DEFAULTS = {
         'rainyNight': '\udb81\ude7e',
         'snowyIcyDay': '\udb81\udd98',
         'snowyIcyNight': '\udb81\udd98',
+        'partlyCloudyDay': '\ue302',
+        'partlyCloudyNight': '\ue32e',
         'blizzard': '\uebaa',
         'default': '\uebaa'
     },
@@ -87,9 +89,29 @@ VALIDATION_SCHEMA = {
                 'type': 'string',
                 'default': DEFAULTS['icons']['snowyIcyNight'],
             },
+            'partlyCloudyDay': {
+                'type': 'string',
+                'default': DEFAULTS['icons']['partlyCloudyDay'],
+            },
+            'partlyCloudyNight': {
+                'type': 'string',
+                'default': DEFAULTS['icons']['partlyCloudyNight'],
+            },
             'blizzard': {
                 'type': 'string',
                 'default': DEFAULTS['icons']['blizzard'],
+            },
+            'wind_dir': {
+                'type': 'string',
+                'default': '\uf175',
+            },
+            'rain': {
+                'type': 'string',
+                'default': '\ue371',
+            },
+            'uv_strength': {
+                'type': 'string',
+                'default': '\udb85\udffe',
             },
             'default': {
                 'type': 'string',
