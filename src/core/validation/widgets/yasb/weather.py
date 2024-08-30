@@ -113,6 +113,10 @@ VALIDATION_SCHEMA = {
                 'type': 'string',
                 'default': '\udb85\udffe',
             },
+            'wind': {
+                'type': 'string',
+                'default': '\uef16',
+            },
             'default': {
                 'type': 'string',
                 'default': DEFAULTS['icons']['default'],
