@@ -155,7 +155,13 @@ class WeatherWidget(BaseWidget):
     def get_weather_data(self, api_url):
         logging.info(f"Fetched new weather data at {datetime.now()}")
         try:
-            with urllib.request.urlopen(api_url) as response:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0',
+                'Cache-Control': 'no-cache',
+                'Referer': 'http://google.com'
+            }
+            request = urllib.request.Request(api_url, headers=headers)
+            with urllib.request.urlopen(request) as response:
                 weather_data = json.loads(response.read())
                 current = weather_data['current']
                 forecast = weather_data['forecast']['forecastday'][0]['day']
@@ -166,7 +172,10 @@ class WeatherWidget(BaseWidget):
                  
                 if conditions_code in {1063,1180,1183,1186,1189,1192,1195,1198,1201,1240,1243,1246,1273,1276,1279}:
                     conditions_data = "rainy"
-
+                    
+                if conditions_code in {1003}:
+                    conditions_data = "cloudy"
+                    
                 if conditions_code in {1114,1210,1213,1219,1222,1225,1237,1255,1258,1261,1264,1246,1282}:
                     conditions_data = "snowyIcy"
                 icon_string = f"{conditions_data}{'Day' if current['is_day'] == 1 else 'Night'}".strip()

@@ -1,34 +1,28 @@
+import psutil
 import re
-import subprocess
-import json
 from core.widgets.base import BaseWidget
-from core.validation.widgets.yasb.custom import VALIDATION_SCHEMA
+from core.validation.widgets.yasb.disk import VALIDATION_SCHEMA
 from PyQt6.QtWidgets import QLabel, QHBoxLayout, QWidget
 from PyQt6.QtCore import Qt
-from core.utils.win32.system_function import function_map
 
-class CustomWidget(BaseWidget):
+class DiskWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
 
     def __init__(
             self,
             label: str,
             label_alt: str,
-            label_max_length: int,
-            exec_options: dict,
-            callbacks: dict,
-            class_name: str
+            volume_label: str,
+            update_interval: int,
+            callbacks: dict[str, str],
     ):
-        super().__init__(exec_options['run_interval'], class_name=f"custom-widget {class_name}")
-        self._label_max_length = label_max_length
-        self._exec_data = None
-        self._exec_cmd = exec_options['run_cmd'].split(" ") if exec_options.get('run_cmd', False) else None
-        self._exec_return_type = exec_options['return_format']
-
+        super().__init__(int(update_interval * 1000), class_name="disk-widget")
+ 
         self._show_alt_label = False
         self._label_content = label
         self._label_alt_content = label_alt
- 
+        self._volume_label = volume_label
+        
         # Construct container
         self._widget_container_layout: QHBoxLayout = QHBoxLayout()
         self._widget_container_layout.setSpacing(0)
@@ -43,17 +37,12 @@ class CustomWidget(BaseWidget):
         self._create_dynamically_label(self._label_content, self._label_alt_content)
 
         self.register_callback("toggle_label", self._toggle_label)
-        self.register_callback("exec_custom", self._exec_callback)
-
+        self.register_callback("update_label", self._update_label)
         self.callback_left = callbacks['on_left']
         self.callback_right = callbacks['on_right']
         self.callback_middle = callbacks['on_middle']
-        self.callback_timer = "exec_custom"
-
-        if exec_options['run_once']:
-            self._exec_callback()
-        else:
-            self.start_timer()
+        self.callback_timer = "update_label"
+        self.start_timer()
 
     def _toggle_label(self):
         self._show_alt_label = not self._show_alt_label
@@ -63,11 +52,10 @@ class CustomWidget(BaseWidget):
             widget.setVisible(self._show_alt_label)
         self._update_label()
 
-
     def _create_dynamically_label(self, content: str, content_alt: str):
         def process_content(content, is_alt=False):
             label_parts = re.split('(<span.*?>.*?</span>)', content)
-            #label_parts = [part for part in label_parts if part]
+            label_parts = [part for part in label_parts if part]
             widgets = []
             for part in label_parts:
                 part = part.strip()  # Remove any leading/trailing whitespace
@@ -82,7 +70,7 @@ class CustomWidget(BaseWidget):
                 else:
                     label = QLabel(part)
                     label.setProperty("class", "label")
-                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                label.setAlignment(Qt.AlignmentFlag.AlignCenter)    
                 self._widget_container_layout.addWidget(label)
                 widgets.append(label)
                 if is_alt:
@@ -92,60 +80,56 @@ class CustomWidget(BaseWidget):
             return widgets
         self._widgets = process_content(content)
         self._widgets_alt = process_content(content_alt, is_alt=True)
-        
-    def _truncate_label(self, label):
-        if self._label_max_length and len(label) > self._label_max_length:
-            return label[:self._label_max_length] + "..."
-
-        return label
 
     def _update_label(self):
         active_widgets = self._widgets_alt if self._show_alt_label else self._widgets
         active_label_content = self._label_alt_content if self._show_alt_label else self._label_content
         label_parts = re.split('(<span.*?>.*?</span>)', active_label_content)
-        #label_parts = [part for part in label_parts if part]
+        label_parts = [part for part in label_parts if part]
         widget_index = 0
 
         try:
-         
-            for part in label_parts:
-                part = part.strip()
-                if part and widget_index < len(active_widgets) and isinstance(active_widgets[widget_index], QLabel):
-                    if '<span' in part and '</span>' in part:
-                        # Ensure the icon is correctly set
-                        icon = re.sub(r'<span.*?>|</span>', '', part).strip()
-                        active_widgets[widget_index].setText(icon)
-                    else:
-                        active_widgets[widget_index].setText(self._truncate_label(part.format(data=self._exec_data)))
-                    widget_index += 1
- 
+            disk_space = self._get_space()
         except Exception:
-            active_widgets[widget_index].setText(self._truncate_label(part))
+            disk_space = None
 
-    def _exec_callback(self):
-        self._exec_data = None
+        for part in label_parts:
+            part = part.strip()
+            if part and widget_index < len(active_widgets) and isinstance(active_widgets[widget_index], QLabel):
+                if '<span' in part and '</span>' in part:
+                    # Ensure the icon is correctly set
+                    icon = re.sub(r'<span.*?>|</span>', '', part).strip()
+                    active_widgets[widget_index].setText(icon)
+                else:
+                    # Update label with formatted content
+                    formatted_text = part.format(space=disk_space, volume_label=self._volume_label) if disk_space else part
+                    active_widgets[widget_index].setText(formatted_text)
+                widget_index += 1
 
-        if self._exec_cmd:
-            proc = subprocess.Popen(self._exec_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, shell=True)
-            output = proc.stdout.read()
-            if self._exec_return_type == "json":
-                self._exec_data = json.loads(output)
-            else:
-                self._exec_data = output.decode('utf-8').strip()
+ 
 
-            self._update_label()
-
-    def _cb_execute_subprocess(self, cmd: str, *cmd_args: list[str]):
-        # Overrides the default 'exec' callback from BaseWidget to allow for data formatting
-        if self._exec_data:
-            formatted_cmd_args = []
-            for cmd_arg in cmd_args:
-                try:
-                    formatted_cmd_args.append(cmd_arg.format(data=self._exec_data))
-                except KeyError:
-                    formatted_cmd_args.append(cmd_args)
-            cmd_args = formatted_cmd_args
-        if cmd in function_map:
-            function_map[cmd]()
-        else:
-            subprocess.Popen([cmd, *cmd_args] if cmd_args else [cmd], shell=True)
+    def _get_space(self):
+        partitions = psutil.disk_partitions()
+        specific_partitions = [partition for partition in partitions if partition.device in (f'{self._volume_label}:\\')]
+ 
+        for partition in specific_partitions:
+            usage = psutil.disk_usage(partition.mountpoint)
+            percent_used = usage.percent
+            percent_free = 100 - percent_used
+            return {
+                "total": {
+                    'mb': f"{usage.total / (1024 ** 2):.1f}MB",
+                    'gb': f"{usage.total / (1024 ** 3):.1f}GB"
+                },
+                "free": {
+                    'mb': f"{usage.free / (1024 ** 2):.1f}MB",
+                    'gb': f"{usage.free / (1024 ** 3):.1f}GB",
+                    'percent': f"{percent_free:.1f}%"
+                },
+                "used": {
+                    'mb': f"{usage.used / (1024 ** 2):.1f}MB",
+                    'gb': f"{usage.used / (1024 ** 3):.1f}GB",
+                    'percent': f"{percent_used:.1f}%"
+                }
+            }
+        return None

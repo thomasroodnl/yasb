@@ -1,8 +1,9 @@
 watch_stylesheet: true
 watch_config: true
-
+debug: false # Enable debug mode to see more logs
 
 # This komorebi setting will be used for tray context menu.
+# If you don't use komorebi, you can remove this section.
 komorebi:
   start_command: "komorebic start --whkd"
   stop_command: "komorebic stop --whkd"
@@ -12,8 +13,7 @@ komorebi:
 bars:
   status-bar:
     enabled: true
-    #screens: ['DELL P2419H (1)'] 
-    #screens: ['DELL P2419H (2)'] 
+    #screens: ['DELL P2419H (1)'] # If you want to show on specific screen
     screens: ['*'] 
     class_name: "yasb-bar"
     alignment:
@@ -48,21 +48,35 @@ bars:
         ]
       right:
         [
+          
           "media",
           "wifi",
+          #"disk",
           #"battery",
-          #"lang",
+          #"language",
           #"ip_info",
           #"traffic",
           "cpu",
           #"github",
           "weather",
           "memory",
-          "wallapers",
+          #"wallapers",
           "volume",
           "power_menu"
         ]
 widgets:
+
+  disk:
+    type: "yasb.disk.DiskWidget"
+    options:
+        label: "{volume_label} {space[used][percent]}"
+        label_alt: "{volume_label} {space[used][gb]} / {space[total][gb]}"
+        volume_label: "C"
+        update_interval: 60 # Update interval in seconds
+        callbacks:
+          on_middle: "do_nothing"
+          on_right: "exec explorer C:\\" # Open disk C in file explorer
+
   media:
     type: "yasb.media.MediaWidget"
     options:
@@ -143,6 +157,17 @@ widgets:
       callbacks:
         on_right: "exec cmd /c Taskmgr"
 
+
+  language:
+    type: "yasb.language.LanguageWidget"
+    options:
+      label: "<span>\uf1ab</span> {lang[language_code]}-{lang[country_code]}"
+      label_alt: " {lang[full_name]}"
+      update_interval: 5 # 5 seconds
+      callbacks:
+        on_left: "toggle_label"
+
+
   komorebi_workspaces:
     type: "komorebi.workspaces.WorkspaceWidget"
     options:
@@ -184,12 +209,6 @@ widgets:
       label: "<span>{wifi_icon}</span>"
       label_alt: "{wifi_name} {wifi_strength}%"
       update_interval: 5000
-      wifi_icons:
-        - "\udb82\udd2e" # 0% strength (no wifi)
-        - "\udb82\udd1f" # 1-25% strength
-        - "\udb82\udd22" # 26-50% strength
-        - "\udb82\udd25" # 51-75% strength
-        - "\udb82\udd28" # 76-100% strength. Alternate theming: \uf1eb
       callbacks:
         on_left: "exec cmd.exe /c start ms-settings:network"
         on_middle: "do_nothing"
@@ -244,18 +263,6 @@ widgets:
         default: "\uebaa"
         # https://www.weatherapi.com/docs/
         # Usage {temp_c}, {min_temp_c}, {max_temp_c}, {temp_f}, {min_temp_f}, {max_temp_f}, {location}, {humidity}, {icon}, {conditions}
-
-  lang:
-    type: "yasb.custom.CustomWidget"
-    options:
-      label: "<span>\uf1ab</span>{data}"
-      label_alt: "{data}"
-      class_name: "lang-widget"
-      exec_options:
-        run_cmd: "powershell Add-Type -AssemblyName System.Windows.Forms;([System.Windows.Forms.InputLanguage]::CurrentInputLanguage).Culture.Name"
-        # run every 10 sec
-        run_interval: 10000
-        return_format: "string"
 
   volume:
     type: "yasb.volume.VolumeWidget"
@@ -317,12 +324,13 @@ widgets:
       label: "<span>\ueba1</span>"
       label_alt: "Notifications {data}" # {data} return number of unread notification
       token: ghp_xxxxxxxxxxx # GitHub Personal access tokens (classic) https://github.com/settings/tokens
+      # You can set token: env, this means you have to set YASB_GITHUB_TOKEN in environment variable
       max_notification: 20 # Max number of notification displaying in menu max: 50
-      only_unread: false # Show only unread or all notifications; if you set it to False, all new (unread) will have a white icon.
+      only_unread: false # Show only unread or all notifications; 
       max_field_size: 54 # Max characters in title before truncation.
-      menu_width: 400
-      menu_height: 400
-      menu_offset: 240
+      menu_width: 400 
+      menu_height: 400 
+      menu_offset: 240 
       update_interval: 300 # Check for new notification in seconds
 
   wallapers:
@@ -350,3 +358,5 @@ widgets:
       label: "\ue62a"
       label_alt: "\ue62a"
       class_name: "system-widget"
+      callbacks:
+        on_left: "exec start_menu"

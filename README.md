@@ -5,11 +5,30 @@
   <br><br>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/amnweb/yasb"><img src="https://img.shields.io/github/languages/top/amnweb/yasb"></a>
-  <a href="https://github.com/amnweb/yasb/issues"><img src="https://img.shields.io/github/issues/amnweb/yasb"></a>
+  <a href="https://github.com/amnweb/yasb/issues"><img src="https://img.shields.io/github/issues/amnweb/yasb?label=Issues"></a>
+  <a href="https://github.com/amnweb/yasb/releases"><img src="https://img.shields.io/github/downloads/amnweb/yasb/total?label=Total%20Downloads"></a>
+  <a href="https://github.com/amnweb/yasb/releases/latest"><img src="https://img.shields.io/github/v/release/amnweb/yasb?label=Latest%20Release"></a>
 </p>
 
-### How do you run it?
-- Install [Nerd Fonts](https://www.nerdfonts.com/font-downloads) (JetBrains recommended)
+***
+
+<h3 align="center">
+<a href="https://github.com/amnweb/yasb/wiki">Wiki</a>・<a href="https://github.com/amnweb/yasb-themes">Share Your Theme</a>・<a href="https://github.com/amnweb/yasb/discussions">Discussions</a>・<a href="https://github.com/amnweb/yasb/issues">Report a bug</a>
+</h3>
+
+
+### Requirements
+- Nerd Fonts. Install [Nerd Fonts](https://www.nerdfonts.com/font-downloads) (JetBrainsMono recommended)
+- Windows 10 & 11
+
+### Installer
+- Visit the [releases page](https://github.com/amnweb/yasb/releases) on GitHub.
+- Look for the latest release version, which will typically be listed at the top.
+- Under the "Assets" section of the release, you’ll find various files. Click on the installer file to download it.
+
+***
+
+### Using Python
 - Install Python 3.12
 - Install required Python Modules:
   - pip install -r [requirements.txt](requirements.txt)
@@ -18,6 +37,14 @@
 - Start the application:
   - run `python src/main.py` in your terminal (or click [yasb.vbs](src/yasb.vbs))
 
+***
+
+### Winget
+Make sure you have installed the latest version of [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/) and verified that installed binaries are available in your `$PATH` before proceeding.
+Install the YASB using winget install
+```
+winget install --id AmN.yasb
+```
 
 ## Demo YASB
 ![Reborn](demo/demo3.png)
@@ -48,4 +75,12 @@
 .power-menu-popup > .button > .label {} -> Styles for power buttons icons and labels inside the popup
 .media-widget {} -> Styles specific to the media widget
 .github-widget {} -> Styles specific to the github widget
+.language-widget {} -> Styles specific to the language widget
+.disk-widget {} -> Styles specific to the disk widget
 ```
+
+
+## 🏆 Contributors
+Thanks to our amazing contributors!
+
+[![YASB Contributors](https://contrib.rocks/image?repo=amnweb/yasb)](https://github.com/amnweb/yasb/graphs/contributors)
