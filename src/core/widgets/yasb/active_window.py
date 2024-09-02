@@ -130,14 +130,15 @@ class ActiveWindowWidget(BaseWidget):
         monitor_name = win_info['monitor_info'].get('device', None)
 
         if self._monitor_exclusive and self.screen().name() != monitor_name and win_info.get('monitor_hwnd', 'Unknown') != self.monitor_hwnd:
-            self.hide()
+            self._window_icon_label.hide()
+
         else:
-            self.show()
+            self._window_icon_label.show()
             self._update_window_title(hwnd, win_info, event)
 
         # Check if the window title is in the list of ignored titles
         if(win_info['title'] in IGNORED_TITLES):
-            self.hide()
+            self._window_icon_label.hide()
 
     def _on_window_name_change_event(self, hwnd: int, event: WinEvent) -> None:
         if self._win_info and hwnd == self._win_info["hwnd"]:
