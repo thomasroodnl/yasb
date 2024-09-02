@@ -34,7 +34,6 @@ class WindLabel(QLabel):
         self.wind_angle = 0
     def paintEvent(self, event):
         rect = self.rect()
-
         painter = QPainter(self)
         painter.translate(rect.center().x(), rect.center().y())
         painter.rotate(self.wind_angle)
@@ -177,7 +176,6 @@ class WeatherWidget(BaseWidget):
         except Exception as e:
             logging.exception(f"Failed to update label: {e}")
 
-        print(self._widget_container.width())
     def fetch_weather_data(self):
         # Start a new thread to fetch weather data
         threading.Thread(target=self._get_weather_data).start()
