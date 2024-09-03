@@ -246,4 +246,5 @@ class WeatherWidget(BaseWidget):
                          ['wind_kph', 'wind_degree', 'precip_mm', 'uv']})
             info['{uv}'] = round(info['{uv}'])
             info['{wind_kph}'] = round(info['{wind_kph}'])
+            info['{precip_mm}'] = round(info['{precip_mm}'], 1)
             return info
