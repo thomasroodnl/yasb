@@ -1,11 +1,11 @@
 import json
 import logging
+import math
 import re
 import urllib.request
 import urllib.parse
 import threading
 from datetime import datetime
-from math import radians
 
 from PyQt6.QtGui import QPainter, QTextOption, QTransform, QFont
 from core.widgets.base import BaseWidget
@@ -32,16 +32,23 @@ class WindLabel(QLabel):
     def __init__(self, icon):
         super().__init__(icon)
         self.wind_angle = 0
-    def paintEvent(self, event):
-        rect = self.rect()
-        painter = QPainter(self)
-        painter.translate(rect.center().x(), rect.center().y())
-        painter.rotate(self.wind_angle)
-        painter.translate(-rect.center().x(), -rect.center().y())
-        text = self.text()
-        painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
-        painter.end()
+        self.setFixedSize(10, 10)
 
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        print(self.wind_angle)
+        radians = math.radians(self.wind_angle)
+        text_bbox = self.fontMetrics().boundingRect(self.text())
+
+        width_offset = text_bbox.width() / 2
+        height_offset = text_bbox.height() / 2
+        pos = self.rect().center() - QPoint(round(math.sin(height_offset)) + 2, round(math.cos(width_offset)) + 1) #+ QPoint(round(radius * math.sin(radians)), round(-radius * math.cos(radians)))
+        t = QTransform()
+        t.translate(pos.x(), pos.y())
+        t.rotateRadians(radians, Qt.Axis.ZAxis)
+        painter.setTransform(t)
+        painter.drawText(QRect(-50, -50, 100, 100),
+                         Qt.AlignmentFlag.AlignCenter, self.text())
 
 class WeatherWidget(BaseWidget):
     validation_schema = VALIDATION_SCHEMA
