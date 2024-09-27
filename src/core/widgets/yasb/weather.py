@@ -36,7 +36,6 @@ class WindLabel(QLabel):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        print(self.wind_angle)
         radians = math.radians(self.wind_angle)
         text_bbox = self.fontMetrics().boundingRect(self.text())
 
